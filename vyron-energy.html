@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VYRON — Power Beyond Limits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#00d4ff;--blue2:#0066ff;--purple:#bf00ff;--pink:#ff003c;--green:#00ff88;--gold:#ffaa00;--yellow:#d4ff00;--bg:#02010a;--bg2:#05030f;--text:#e0e0ff;--dim:#4a4a6a;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;cursor:none;}
+
+/* CURSOR */
+#cur{width:12px;height:12px;background:var(--blue);border-radius:50%;position:fixed;z-index:9999;pointer-events:none;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:screen;box-shadow:0 0 20px var(--blue),0 0 40px var(--blue);}
+#cur-ring{width:40px;height:40px;border:1px solid rgba(0,212,255,.4);border-radius:50%;position:fixed;z-index:9998;pointer-events:none;transform:translate(-50%,-50%);transition:all .1s ease;}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;z-index:1000;opacity:.03;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px 200px;}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── INTRO OVERLAY ── */
+#intro{position:fixed;inset:0;z-index:2000;background:#02010a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s ease;}
+#intro.gone{opacity:0;pointer-events:none;}
+.intro-logo{font-family:'Bebas Neue',sans-serif;font-size:7rem;letter-spacing:.3em;background:linear-gradient(90deg,#fff,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:scale(.85);animation:introLogoIn .9s .3s cubic-bezier(.16,1,.3,1) forwards;}
+.intro-line{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);margin-top:1.5rem;animation:introLineExpand .7s .9s ease forwards;}
+.intro-sub{font-size:.75rem;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:1.2rem;opacity:0;animation:fadeUp .6s 1.2s ease forwards;}
+.intro-bar{width:160px;height:1px;background:rgba(255,255,255,.08);margin-top:2.5rem;position:relative;overflow:hidden;}
+.intro-bar::after{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:var(--blue);animation:introBarFill 1s 1.4s ease forwards;}
+@keyframes introLogoIn{to{opacity:1;transform:scale(1);}}
+@keyframes introLineExpand{to{width:300px;}}
+@keyframes introBarFill{to{width:100%;}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 4rem;background:linear-gradient(to bottom,rgba(2,1,10,.95),transparent);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.3em;background:linear-gradient(90deg,#fff,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoPulse 3s ease-in-out infinite;}
+@keyframes logoPulse{0%,100%{filter:drop-shadow(0 0 8px rgba(0,212,255,.5));}50%{filter:drop-shadow(0 0 20px rgba(0,212,255,.9)) drop-shadow(0 0 40px rgba(191,0,255,.5));}}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{color:rgba(255,255,255,.45);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;transition:color .3s;position:relative;}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.nav-links a:hover{color:#fff;}.nav-links a:hover::after{transform:scaleX(1);}
+.nav-cta{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;padding:.6rem 1.6rem;cursor:none;background:transparent;border:1px solid var(--blue);color:var(--blue);position:relative;overflow:hidden;transition:color .3s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+.nav-cta::before{content:'';position:absolute;inset:0;background:var(--blue);transform:translateX(-100%);transition:transform .3s;z-index:-1;}
+.nav-cta:hover{color:#000;}.nav-cta:hover::before{transform:translateX(0);}
+
+section{position:relative;z-index:10;}
+.eyebrow{font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;}
+.eyebrow::before{content:'';width:2rem;height:1px;background:var(--blue);}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:0 4rem;padding-top:6rem;overflow:hidden;position:relative;}
+#hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);pointer-events:none;z-index:2;}
+.hero-left{z-index:5;}
+.hero-kicker{font-size:.8rem;letter-spacing:.5em;text-transform:uppercase;color:var(--blue);margin-bottom:2.2rem;display:flex;align-items:center;gap:1rem;animation:fadeUp .8s ease forwards;}
+.kicker-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 10px var(--blue);animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(6rem,12vw,11rem);line-height:.85;letter-spacing:.02em;text-transform:uppercase;margin-bottom:2.8rem;}
+.hero-h1 .w1{display:block;color:#fff;animation:slideInLeft .9s cubic-bezier(.16,1,.3,1) forwards;opacity:0;text-shadow:0 0 80px rgba(0,212,255,.3);}
+.hero-h1 .w2{display:block;background:linear-gradient(90deg,var(--blue),var(--purple),var(--blue));background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:slideInLeft .9s .12s cubic-bezier(.16,1,.3,1) forwards,shimmer 3s 1s linear infinite;opacity:0;}
+.hero-h1 .w3{display:block;color:rgba(255,255,255,.2);animation:slideInLeft .9s .24s cubic-bezier(.16,1,.3,1) forwards;opacity:0;}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-60px);}to{opacity:1;transform:translateX(0);}}
+@keyframes shimmer{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}
+.hero-sub{font-size:1.2rem;font-weight:400;line-height:1.9;color:rgba(255,255,255,.55);max-width:32rem;margin-bottom:3.2rem;animation:fadeUp .9s .4s ease forwards;opacity:0;letter-spacing:.02em;}
+.hero-sub strong{color:rgba(255,255,255,.9);font-weight:700;}
+.hero-btns{display:flex;gap:1.2rem;align-items:center;animation:fadeUp .9s .55s ease forwards;opacity:0;}
+.btn-glow{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.25em;text-transform:uppercase;padding:1.1rem 3rem;cursor:none;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;position:relative;overflow:hidden;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));transition:all .3s;box-shadow:0 0 30px rgba(0,212,255,.3),inset 0 0 30px rgba(255,255,255,.05);}
+.btn-glow::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--purple),var(--pink));opacity:0;transition:opacity .3s;}
+.btn-glow:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(0,212,255,.5),0 20px 40px rgba(0,0,0,.4);}
+.btn-glow:hover::before{opacity:1;}
+.btn-glow span{position:relative;z-index:1;}
+.btn-ghost{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.2em;text-transform:uppercase;padding:1.1rem 2.4rem;cursor:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));transition:all .3s;}
+.btn-ghost:hover{border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.08);}
+
+/* IMPROVED STATS */
+.hero-stats{display:flex;gap:0;margin-top:4.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,.08);animation:fadeUp .9s .7s ease forwards;opacity:0;}
+.stat-item{flex:1;padding:1.5rem 2rem;border-right:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;transition:background .4s;}
+.stat-item:last-child{border-right:none;}
+.stat-item::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.06),transparent);opacity:0;transition:opacity .4s;}
+.stat-item:hover::before{opacity:1;}
+.stat-item:hover{background:rgba(0,212,255,.04);}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:4rem;line-height:1;background:linear-gradient(180deg,#fff 30%,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-unit{font-family:'Bebas Neue',sans-serif;font-size:2rem;background:linear-gradient(180deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-l{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:.4rem;}
+.stat-bar{height:2px;background:rgba(255,255,255,.05);margin-top:.8rem;border-radius:1px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:1px;animation:barGrow2 1.5s 1.5s ease forwards;width:0;}
+.stat-item:nth-child(1) .stat-bar-fill{background:var(--blue);--bw2:100%;}
+.stat-item:nth-child(2) .stat-bar-fill{background:var(--purple);--bw2:85%;}
+.stat-item:nth-child(3) .stat-bar-fill{background:var(--green);--bw2:57%;}
+@keyframes barGrow2{to{width:var(--bw2,80%);}}
+
+/* HERO RIGHT — SCROLL-SPIN CAN */
+.hero-right{display:flex;justify-content:center;align-items:center;position:relative;z-index:5;}
+.can-scene{position:relative;width:320px;height:580px;perspective:900px;}
+.can-orbit-ring{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.cring{position:absolute;border-radius:50%;border:1px solid rgba(0,212,255,.12);animation:cringRotate linear infinite;}
+.cring:nth-child(1){width:280px;height:280px;animation-duration:20s;border-color:rgba(0,212,255,.15);}
+.cring:nth-child(2){width:360px;height:360px;animation-duration:30s;animation-direction:reverse;border-color:rgba(191,0,255,.1);}
+.cring:nth-child(3){width:440px;height:440px;animation-duration:45s;border-color:rgba(0,212,255,.06);}
+@keyframes cringRotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.can-halo{position:absolute;inset:-60px;background:radial-gradient(ellipse,rgba(0,212,255,.2) 0%,rgba(191,0,255,.12) 40%,transparent 70%);filter:blur(30px);animation:haloPulse 3s ease-in-out infinite;}
+@keyframes haloPulse{0%,100%{transform:scale(1);opacity:.7;}50%{transform:scale(1.15);opacity:1;}}
+#hero-can-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transform-style:preserve-3d;}
+#hero-can-svg{display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,.95)) drop-shadow(0 0 30px rgba(0,212,255,.25));}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+/* MARQUEE */
+.marquee-strip{background:var(--blue);padding:.6rem 0;overflow:hidden;position:relative;z-index:10;}
+.marquee-inner{display:flex;white-space:nowrap;animation:marqueeScroll 15s linear infinite;}
+.marquee-item{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.2em;color:#000;padding:0 2rem;flex-shrink:0;}
+@keyframes marqueeScroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ── FLAVORS ── */
+#flavors{padding:10rem 0 8rem;overflow:hidden;}
+.flavor-header{padding:0 4rem 5rem;display:flex;align-items:flex-end;justify-content:space-between;}
+.flavor-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,8vw,7rem);line-height:.85;color:#fff;text-shadow:0 0 100px rgba(0,212,255,.2);}
+.flavor-h2 em{display:block;font-style:normal;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.flavor-count{font-family:'Bebas Neue',sans-serif;font-size:8rem;color:rgba(255,255,255,.04);line-height:1;}
+.flavors-accordion{display:flex;height:600px;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);}
+.fl{flex:1;position:relative;overflow:hidden;cursor:none;transition:flex .7s cubic-bezier(.16,1,.3,1);border-right:1px solid rgba(255,255,255,.04);}
+.fl:hover{flex:3.5;}
+.fl-bg{position:absolute;inset:0;transition:opacity .7s;}
+.fl:not(:hover) .fl-bg{opacity:.3;}
+.fl-wm .fl-bg{background:radial-gradient(ellipse at 50% 100%,rgba(210,50,50,.5),rgba(180,20,20,.2) 40%,transparent 70%);}
+.fl-mg .fl-bg{background:radial-gradient(ellipse at 50% 100%,rgba(220,160,0,.45),rgba(180,90,0,.15) 50%,transparent 75%);}
+.fl-vb .fl-bg{background:radial-gradient(ellipse at 50% 100%,rgba(30,90,200,.6),rgba(20,60,160,.2) 50%,transparent 75%);}
+.fl-nc .fl-bg{background:radial-gradient(ellipse at 50% 100%,rgba(90,160,60,.5),rgba(50,120,30,.15) 50%,transparent 75%);}
+.fl-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;filter:blur(60px);opacity:0;transition:opacity .7s;}
+.fl:hover .fl-glow{opacity:1;}
+.fl-wm .fl-glow{background:rgba(200,40,40,.6);}
+.fl-mg .fl-glow{background:rgba(220,150,0,.5);}
+.fl-vb .fl-glow{background:rgba(20,80,200,.6);}
+.fl-nc .fl-glow{background:rgba(80,180,50,.45);}
+.fl-line{position:absolute;top:0;bottom:0;left:0;width:2px;opacity:.7;}
+.fl-wm .fl-line{background:linear-gradient(to bottom,transparent,#cc3333,transparent);}
+.fl-mg .fl-line{background:linear-gradient(to bottom,transparent,#ddaa00,transparent);}
+.fl-vb .fl-line{background:linear-gradient(to bottom,transparent,#1e5ab0,transparent);}
+.fl-nc .fl-line{background:linear-gradient(to bottom,transparent,#4eb830,transparent);}
+.fl-inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:2.5rem 2.2rem;}
+.fl-can-img{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:90px;transition:all .7s cubic-bezier(.16,1,.3,1);filter:drop-shadow(0 20px 50px rgba(0,0,0,.8));animation:flCanFloat 4s ease-in-out infinite;}
+.fl:hover .fl-can-img{width:145px;transform:translate(-50%,-60%);animation:none;}
+@keyframes flCanFloat{0%,100%{transform:translate(-50%,-55%);}50%{transform:translate(-50%,-61%);}}
+.fl-num{position:absolute;top:1.5rem;right:1.5rem;font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:rgba(255,255,255,.15);letter-spacing:.3em;}
+.fl-tag{font-size:.75rem;letter-spacing:.35em;text-transform:uppercase;margin-bottom:.5rem;opacity:0;transform:translateY(8px);transition:all .4s .1s;}
+.fl:hover .fl-tag{opacity:1;transform:translateY(0);}
+.fl-wm .fl-tag{color:#dd5555;}.fl-mg .fl-tag{color:#ddaa00;}.fl-vb .fl-tag{color:#4488dd;}.fl-nc .fl-tag{color:#55cc44;}
+.fl-name{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:#fff;letter-spacing:.04em;white-space:nowrap;}
+.fl-desc{font-size:1rem;color:rgba(255,255,255,.6);font-weight:400;line-height:1.7;max-height:0;overflow:hidden;transition:max-height .6s ease,opacity .4s;opacity:0;}
+.fl:hover .fl-desc{max-height:100px;opacity:1;}
+.fl-arrow{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;margin-top:1rem;opacity:0;transform:translateX(-8px);transition:all .4s .2s;}
+.fl:hover .fl-arrow{opacity:1;transform:translateX(0);}
+.fl-wm .fl-arrow{color:#dd5555;}.fl-mg .fl-arrow{color:#ddaa00;}.fl-vb .fl-arrow{color:#4488dd;}.fl-nc .fl-arrow{color:#55cc44;}
+
+/* ── INGREDIENTS ── */
+#ingredients{padding:10rem 4rem;position:relative;}
+#ingredients::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 10% 50%,rgba(0,212,255,.06),transparent 60%),radial-gradient(ellipse 40% 50% at 90% 50%,rgba(191,0,255,.05),transparent 60%);pointer-events:none;}
+.ing-grid-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:6rem;align-items:start;}
+.ing-sticky{position:sticky;top:8rem;}
+.ing-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,6vw,5.5rem);line-height:.88;color:#fff;margin-bottom:2rem;}
+.ing-h2 span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;}
+.ing-body{font-size:1.1rem;font-weight:400;line-height:1.9;color:rgba(255,255,255,.5);margin-bottom:2.5rem;}
+.formula-badge{display:inline-flex;align-items:center;gap:.75rem;border:1px solid rgba(0,212,255,.25);padding:.7rem 1.4rem;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--blue);}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);animation:blink 1.5s infinite;}
+.ing-stack{display:flex;flex-direction:column;gap:1px;}
+.ing-item{display:grid;grid-template-columns:60px 1fr;gap:1.5rem;align-items:center;padding:1.8rem 2rem;border:1px solid rgba(255,255,255,.04);background:rgba(5,3,15,.5);position:relative;overflow:hidden;cursor:none;transition:all .4s;}
+.ing-item::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,212,255,.04),transparent);opacity:0;transition:opacity .4s;}
+.ing-item:hover{border-color:rgba(0,212,255,.15);}.ing-item:hover::before{opacity:1;}
+.ing-item-bar{position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--blue);transform:scaleY(0);transform-origin:bottom;transition:transform .5s cubic-bezier(.16,1,.3,1);}
+.ing-item:hover .ing-item-bar{transform:scaleY(1);}
+.ing-icon-box{width:52px;height:52px;border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:1.4rem;transition:border-color .4s;}
+.ing-item:hover .ing-icon-box{border-color:rgba(0,212,255,.3);}
+.ing-name{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.2rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:.15rem;}
+.ing-dose{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.4rem;}
+.ing-desc{font-size:.95rem;font-weight:400;color:rgba(255,255,255,.5);line-height:1.7;}
+
+/* ── WHY VYRON ── */
+#why{padding:10rem 4rem;position:relative;}
+.why-header{text-align:center;margin-bottom:5rem;}
+.why-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,8vw,7.5rem);color:#fff;text-shadow:0 0 120px rgba(191,0,255,.3);}
+.why-h2 em{font-style:normal;background:linear-gradient(90deg,var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.why-sub{color:rgba(255,255,255,.45);font-size:1.1rem;font-weight:400;margin-top:1rem;}
+.bento{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(3,180px);gap:2px;}
+.bento-cell{background:rgba(5,3,15,.8);border:1px solid rgba(255,255,255,.04);padding:2rem;position:relative;overflow:hidden;cursor:none;transition:border-color .5s,background .5s,transform .6s cubic-bezier(.16,1,.3,1),box-shadow .5s;opacity:0;transform:translateY(50px) scale(.97);}
+.bento-cell.bvis{opacity:1;transform:translateY(0) scale(1);}
+.bento-cell:hover{border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.04);transform:translateY(-4px) scale(1.01);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(0,212,255,.06);z-index:2;}
+.bento-cell::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at var(--mx,50%) var(--my,50%),rgba(0,212,255,.1),transparent 60%);opacity:0;transition:opacity .4s;}
+.bento-cell:hover::after{opacity:1;}
+.bento-cell:nth-child(1){transition-delay:0s;}.bento-cell:nth-child(2){transition-delay:.08s;}.bento-cell:nth-child(3){transition-delay:.16s;}
+.bento-cell:nth-child(4){transition-delay:.24s;}.bento-cell:nth-child(5){transition-delay:.32s;}.bento-cell:nth-child(6){transition-delay:.4s;}
+.bento-cell:nth-child(7){transition-delay:.48s;}.bento-cell:nth-child(8){transition-delay:.56s;}
+.bento-cell::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.16,1,.3,1);}
+.bento-cell.bvis::before{transform:scaleX(1);}
+.bc-1{grid-column:span 5;grid-row:span 2;}.bc-2{grid-column:span 4;}.bc-3{grid-column:span 3;}
+.bc-4{grid-column:span 4;}.bc-5{grid-column:span 3;}.bc-6{grid-column:span 5;}
+.bc-7{grid-column:span 4;}.bc-8{grid-column:span 3;}
+.bento-cell .bc-icon{font-size:2.2rem;margin-bottom:1rem;display:block;filter:drop-shadow(0 0 10px rgba(0,212,255,.5));transition:transform .3s,filter .3s;}
+.bento-cell:hover .bc-icon{transform:scale(1.2) rotate(-5deg);filter:drop-shadow(0 0 20px rgba(0,212,255,.9));}
+.bc-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:.5rem;}
+.bc-desc{font-size:.95rem;font-weight:400;color:rgba(255,255,255,.45);line-height:1.65;}
+.bc-big{font-family:'Bebas Neue',sans-serif;font-size:4rem;line-height:1;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.bc-big-label{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:.4rem;}
+.bc-bar-wrap{margin-top:1rem;}.bc-bar-track{height:2px;background:rgba(255,255,255,.06);position:relative;overflow:hidden;}
+.bc-bar-fill{position:absolute;left:0;top:0;bottom:0;width:0;}
+
+/* ── PERFORMANCE ── */
+#performance{padding:10rem 4rem;position:relative;}
+#performance::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 100%,rgba(191,0,255,.08),transparent 55%);pointer-events:none;}
+.perf-header{margin-bottom:5rem;}
+.perf-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,9vw,8rem);color:#fff;line-height:.85;}
+.perf-h2 em{font-style:normal;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.perf-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:3px;}
+.perf-main-panel{background:rgba(5,3,15,.9);border:1px solid rgba(255,255,255,.05);padding:3.5rem;position:relative;overflow:hidden;}
+.perf-graph-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:2rem;display:flex;align-items:center;gap:1rem;justify-content:space-between;}
+.perf-legend{display:flex;gap:1.5rem;}
+.pl-item{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:rgba(255,255,255,.4);letter-spacing:.1em;}
+.pl-dot{width:6px;height:6px;border-radius:50%;}
+.pl-blue{background:var(--blue);box-shadow:0 0 6px var(--blue);}.pl-dim{background:rgba(255,255,255,.2);}
+.graph-area{width:100%;height:220px;margin-bottom:1rem;}
+.perf-summary{margin-top:2.5rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;}
+.ps-item{border-top:1px solid rgba(255,255,255,.06);padding-top:1.2rem;}
+.ps-val{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ps-label{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:.2rem;}
+.perf-metrics{display:flex;flex-direction:column;gap:3px;}
+.pm-cell{background:rgba(5,3,15,.9);border:1px solid rgba(255,255,255,.05);padding:2.5rem 2rem;flex:1;position:relative;overflow:hidden;cursor:none;transition:all .4s;}
+.pm-cell:hover{border-color:rgba(191,0,255,.2);background:rgba(191,0,255,.03);}
+.pm-label{font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;color:var(--dim);margin-bottom:.8rem;}
+.pm-val{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;line-height:1;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.pm-unit{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-top:.3rem;}
+.pm-radial{margin-top:1rem;}
+
+/* ── ABOUT ── */
+#about{padding:10rem 4rem;position:relative;overflow:hidden;}
+#about::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 0% 50%,rgba(0,212,255,.05),transparent 55%),radial-gradient(ellipse 50% 60% at 100% 30%,rgba(191,0,255,.05),transparent 55%);pointer-events:none;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:8rem;align-items:center;}
+.about-year{font-family:'Bebas Neue',sans-serif;font-size:12rem;line-height:.85;color:rgba(255,255,255,.03);position:absolute;top:3rem;left:2rem;pointer-events:none;letter-spacing:-.02em;}
+.about-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,6vw,5.5rem);line-height:.9;color:#fff;margin-bottom:2.5rem;}
+.about-h2 em{font-style:normal;display:block;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.about-body{font-size:1.1rem;font-weight:400;line-height:1.95;color:rgba(255,255,255,.5);margin-bottom:2rem;}
+.about-right{display:flex;flex-direction:column;gap:2px;}
+.about-stat-row{display:flex;align-items:center;gap:2rem;padding:2rem 2.5rem;background:rgba(5,3,15,.6);border:1px solid rgba(255,255,255,.04);position:relative;overflow:hidden;transition:border-color .4s,background .4s;opacity:0;transform:translateX(40px);}
+.about-stat-row.avis{opacity:1;transform:translateX(0);transition:opacity .7s ease,transform .7s cubic-bezier(.16,1,.3,1),border-color .4s,background .4s;}
+.about-stat-row:nth-child(1){transition-delay:0s;}.about-stat-row:nth-child(2){transition-delay:.1s;}.about-stat-row:nth-child(3){transition-delay:.2s;}.about-stat-row:nth-child(4){transition-delay:.3s;}
+.about-stat-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent,var(--blue),transparent);transform:scaleY(0);transform-origin:center;transition:transform .5s cubic-bezier(.16,1,.3,1);}
+.about-stat-row.avis::before{transform:scaleY(1);}
+.about-stat-row:hover{border-color:rgba(0,212,255,.12);background:rgba(0,212,255,.03);}
+.asr-num{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;line-height:1;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;min-width:100px;}
+.asr-label{font-size:1rem;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.05em;text-transform:uppercase;}
+.asr-sub{font-size:.88rem;font-weight:300;color:rgba(255,255,255,.35);margin-top:.2rem;}
+
+/* ── CTA ── */
+#cta{padding:12rem 4rem;text-align:center;position:relative;overflow:hidden;}
+#cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 30% 50%,rgba(0,212,255,.08),transparent 55%),radial-gradient(ellipse 50% 60% at 70% 50%,rgba(191,0,255,.08),transparent 55%);pointer-events:none;}
+.cta-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,12vw,11rem);line-height:.85;color:#fff;margin-bottom:2.5rem;position:relative;z-index:2;}
+.cta-h2 .line-glow{display:block;background:linear-gradient(90deg,var(--blue),var(--purple),var(--pink),var(--blue));background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite;}
+.cta-sub{font-size:1.1rem;font-weight:400;color:rgba(255,255,255,.45);max-width:32rem;margin:0 auto 3rem;line-height:1.9;position:relative;z-index:2;}
+.cta-btns{display:flex;gap:1.2rem;justify-content:center;position:relative;z-index:2;}
+
+/* ── FOOTER ── */
+footer{background:rgba(3,2,14,.95);border-top:1px solid rgba(255,255,255,.06);position:relative;z-index:10;overflow:hidden;}
+footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),var(--purple),transparent);}
+.footer-top{padding:5rem 4rem 4rem;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:4rem;border-bottom:1px solid rgba(255,255,255,.05);}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.3em;background:linear-gradient(90deg,#fff,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;margin-bottom:1.2rem;}
+.footer-tagline{font-size:.95rem;font-weight:300;line-height:1.8;color:rgba(255,255,255,.3);max-width:220px;margin-bottom:2rem;}
+.footer-socials{display:flex;gap:1rem;}
+.social-btn{width:38px;height:38px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:none;transition:all .3s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));color:rgba(255,255,255,.4);text-decoration:none;}
+.social-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(0,212,255,.08);box-shadow:0 0 20px rgba(0,212,255,.2);}
+.footer-col h4{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:1.6rem;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:.85rem;}
+.footer-col ul a{color:rgba(255,255,255,.4);font-size:.95rem;font-weight:400;letter-spacing:.04em;text-decoration:none;transition:color .3s,padding-left .3s;display:block;position:relative;}
+.footer-col ul a::before{content:'→';position:absolute;left:-1rem;opacity:0;color:var(--blue);transition:opacity .3s,left .3s;font-size:.8rem;}
+.footer-col ul a:hover{color:rgba(255,255,255,.8);padding-left:1rem;}
+.footer-col ul a:hover::before{opacity:1;left:0;}
+.footer-bottom{padding:2rem 4rem;display:flex;justify-content:space-between;align-items:center;}
+.footer-copy{font-size:.72rem;letter-spacing:.12em;color:rgba(255,255,255,.18);text-transform:uppercase;}
+.footer-legal{display:flex;gap:2rem;}
+.footer-legal a{color:rgba(255,255,255,.18);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:color .3s;}
+.footer-legal a:hover{color:rgba(255,255,255,.5);}
+.footer-badge{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:.5rem;}
+.footer-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);animation:blink 2s infinite;}
+
+/* SCROLL REVEALS */
+.sr{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s cubic-bezier(.16,1,.3,1);}
+.sr.d1{transition-delay:.1s;}.sr.d2{transition-delay:.2s;}.sr.d3{transition-delay:.3s;}.sr.d4{transition-delay:.4s;}
+.sr.vis{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  #hero{grid-template-columns:1fr;padding:6rem 2rem 4rem;}
+  .hero-right{display:none;}
+  nav{padding:1.2rem 2rem;}
+  .nav-links,.nav-cta{display:none;}
+  .flavor-header{flex-direction:column;align-items:flex-start;gap:1rem;padding:0 2rem 3rem;}
+  .flavors-accordion{height:420px;}
+  #ingredients{padding:6rem 2rem;}
+  .ing-grid-layout{grid-template-columns:1fr;gap:3rem;}
+  .ing-sticky{position:static;}
+  #why{padding:6rem 2rem;}
+  .bento{grid-template-columns:1fr 1fr;grid-template-rows:auto;}
+  .bc-1,.bc-2,.bc-3,.bc-4,.bc-5,.bc-6,.bc-7,.bc-8{grid-column:span 1;grid-row:span 1;}
+  #performance{padding:6rem 2rem;}
+  .perf-layout{grid-template-columns:1fr;}
+  .perf-metrics{flex-direction:row;flex-wrap:wrap;}
+  .pm-cell{flex:1 1 45%;}
+  #about{padding:6rem 2rem;}
+  .about-grid{grid-template-columns:1fr;gap:3rem;}
+  #cta{padding:6rem 2rem;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:2.5rem;padding:3rem 2rem;}
+  .footer-bottom{flex-direction:column;gap:1.5rem;text-align:center;padding:1.5rem 2rem;}
+  .hero-stats{flex-direction:column;gap:0;}
+}
+</style>
+</head>
+<body>
+
+<!-- INTRO ANIMATION -->
+<div id="intro">
+  <div class="intro-logo">VYRON</div>
+  <div class="intro-line"></div>
+  <div class="intro-sub">Power Beyond Limits</div>
+  <div class="intro-bar"></div>
+</div>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">VYRON</div>
+  <ul class="nav-links">
+    <li><a href="#flavors">Flavors</a></li>
+    <li><a href="#ingredients">Science</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#why">Formula</a></li>
+    <li><a href="#about">Our Story</a></li>
+  </ul>
+  <button class="nav-cta">Fuel Up →</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-kicker"><div class="kicker-dot"></div>Next-Gen Energy · Est. 2024</div>
+    <h1 class="hero-h1">
+      <span class="w1">POWER</span>
+      <span class="w2">BEYOND</span>
+      <span class="w3">LIMITS</span>
+    </h1>
+    <p class="hero-sub">Engineered for <strong>creators, gamers, athletes</strong> and late-night builders who refuse to run on empty.</p>
+    <div class="hero-btns">
+      <button class="btn-glow"><span>Fuel Up</span></button>
+      <button class="btn-ghost">Explore Flavours →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-n" id="stat1">0</div>
+        <div class="stat-l">Active Ingredients</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-item">
+        <div><span class="stat-n" id="stat2">0</span><span class="stat-unit">HR</span></div>
+        <div class="stat-l">Sustained Boost</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n" id="stat3">0</div>
+        <div class="stat-l">Flavor Worlds</div>
+        <div class="stat-bar"><div class="stat-bar-fill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="can-scene">
+      <div class="can-halo"></div>
+      <div class="can-orbit-ring">
+        <div class="cring"></div><div class="cring"></div><div class="cring"></div>
+      </div>
+      <div id="hero-can-wrap">
+        <!-- REALISTIC VYRON CAN SVG — inspired by actual can design -->
+        <svg id="hero-can-svg" viewBox="0 0 200 440" width="200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Main body gradient: silver top blending to brand color -->
+            <linearGradient id="cbody" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0a0a18"/>
+              <stop offset="8%" stop-color="#14142a"/>
+              <stop offset="20%" stop-color="#1e2040"/>
+              <stop offset="32%" stop-color="#263060"/>
+              <stop offset="44%" stop-color="#1060aa"/>
+              <stop offset="52%" stop-color="#40aaee" stop-opacity=".5"/>
+              <stop offset="58%" stop-color="#60ccff" stop-opacity=".7"/>
+              <stop offset="63%" stop-color="#1875cc"/>
+              <stop offset="75%" stop-color="#1040a0"/>
+              <stop offset="88%" stop-color="#14142a"/>
+              <stop offset="100%" stop-color="#08080f"/>
+            </linearGradient>
+            <!-- Silver metallic top third -->
+            <linearGradient id="csilver" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#1a1a2e"/>
+              <stop offset="15%" stop-color="#3a3a5a"/>
+              <stop offset="30%" stop-color="#6a6a9a"/>
+              <stop offset="48%" stop-color="#c8c8e8"/>
+              <stop offset="55%" stop-color="#e0e0f8"/>
+              <stop offset="62%" stop-color="#d0d0ee"/>
+              <stop offset="75%" stop-color="#8080b0"/>
+              <stop offset="88%" stop-color="#3a3a5a"/>
+              <stop offset="100%" stop-color="#18182e"/>
+            </linearGradient>
+            <!-- Orange diagonal slash accent (like real can) -->
+            <linearGradient id="corange" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff8800" stop-opacity=".9"/>
+              <stop offset="100%" stop-color="#cc4400" stop-opacity=".6"/>
+            </linearGradient>
+            <!-- Highlight streak -->
+            <linearGradient id="chl" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="transparent"/>
+              <stop offset="50%" stop-color="rgba(200,220,255,.08)"/>
+              <stop offset="57%" stop-color="rgba(255,255,255,.35)"/>
+              <stop offset="62%" stop-color="rgba(200,220,255,.1)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+            <!-- Top rim metallic -->
+            <linearGradient id="ctop" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#1a1a30"/>
+              <stop offset="25%" stop-color="#4a4a70"/>
+              <stop offset="50%" stop-color="#9090c0"/>
+              <stop offset="75%" stop-color="#4a4a70"/>
+              <stop offset="100%" stop-color="#1a1a30"/>
+            </linearGradient>
+            <!-- Bottom -->
+            <linearGradient id="cbot" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#080812"/>
+              <stop offset="50%" stop-color="#202038"/>
+              <stop offset="100%" stop-color="#080812"/>
+            </linearGradient>
+            <!-- Glow -->
+            <radialGradient id="cglow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(40,120,255,.5)"/>
+              <stop offset="100%" stop-color="rgba(40,120,255,0)"/>
+            </radialGradient>
+            <!-- Phoenix body gradient -->
+            <linearGradient id="cbird" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#60aaff"/>
+              <stop offset="100%" stop-color="#2060cc"/>
+            </linearGradient>
+            <!-- Soft glow filter -->
+            <filter id="fsg" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="3" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="fsg2" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="1.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <clipPath id="canClip">
+              <path d="M38 30 L38 405 Q38 422 100 426 Q162 422 162 405 L162 30 Q162 24 100 22 Q38 24 38 30 Z"/>
+            </clipPath>
+          </defs>
+
+          <!-- GROUND SHADOW -->
+          <ellipse cx="100" cy="432" rx="58" ry="8" fill="rgba(0,0,0,.7)"/>
+
+          <!-- BOTTOM DOME -->
+          <path d="M38 396 Q38 420 100 426 Q162 420 162 396 L162 412 Q162 428 100 432 Q38 428 38 412 Z" fill="url(#cbot)"/>
+
+          <!-- MAIN BODY -->
+          <path d="M38 30 L38 405 Q38 422 100 426 Q162 422 162 405 L162 30 Q162 24 100 22 Q38 24 38 30 Z" fill="url(#cbody)"/>
+
+          <!-- SILVER TOP THIRD (first ~35% of can height) -->
+          <path d="M38 30 L38 178 L162 178 L162 30 Q162 24 100 22 Q38 24 38 30 Z" fill="url(#csilver)" clip-path="url(#canClip)"/>
+
+          <!-- ORANGE DIAGONAL SLASH ACCENTS (like real can) -->
+          <g clip-path="url(#canClip)">
+            <polygon points="38,90 70,30 95,30 63,90" fill="url(#corange)" opacity=".85"/>
+            <polygon points="38,145 80,30 100,30 58,145" fill="url(#corange)" opacity=".4"/>
+            <polygon points="162,90 130,30 108,30 140,90" fill="url(#corange)" opacity=".85"/>
+            <polygon points="162,145 122,30 103,30 143,145" fill="url(#corange)" opacity=".4"/>
+            <!-- Bottom orange slash echoes -->
+            <polygon points="38,310 65,405 85,405 58,310" fill="url(#corange)" opacity=".35"/>
+            <polygon points="162,310 137,405 117,405 144,310" fill="url(#corange)" opacity=".35"/>
+          </g>
+
+          <!-- HIGHLIGHT STREAK OVERLAY -->
+          <path d="M38 30 L38 405 Q38 422 100 426 Q162 422 162 405 L162 30 Q162 24 100 22 Q38 24 38 30 Z" fill="url(#chl)"/>
+
+          <!-- LEFT EDGE SHADOW -->
+          <path d="M38 32 L46 30 L46 406 Q42 418 38 414 Z" fill="rgba(0,0,0,.45)"/>
+          <!-- RIGHT EDGE HIGHLIGHT -->
+          <path d="M154 30 L162 32 L162 410 L154 410 Z" fill="rgba(255,255,255,.06)"/>
+
+          <!-- VERTICAL BRAND STRIPES -->
+          <rect x="56" y="90" width="4" height="260" rx="2" fill="#2288dd" opacity=".7" filter="url(#fsg2)"/>
+          <rect x="140" y="90" width="4" height="260" rx="2" fill="#2288dd" opacity=".7" filter="url(#fsg2)"/>
+
+          <!-- PHOENIX / EAGLE LOGO AREA -->
+          <!-- Bird wings stylized (like the lightning-bird on real can) -->
+          <g filter="url(#fsg)" opacity=".95">
+            <!-- Left wing -->
+            <path d="M72 148 C60 140 52 132 58 122 C64 112 78 116 84 126 C76 122 72 128 72 136 Z" fill="url(#cbird)"/>
+            <path d="M72 148 C64 142 56 138 56 128 C56 118 68 116 76 122 Z" fill="rgba(100,180,255,.5)"/>
+            <!-- Right wing -->
+            <path d="M128 148 C140 140 148 132 142 122 C136 112 122 116 116 126 C124 122 128 128 128 136 Z" fill="url(#cbird)"/>
+            <path d="M128 148 C136 142 144 138 144 128 C144 118 132 116 124 122 Z" fill="rgba(100,180,255,.5)"/>
+            <!-- Body -->
+            <path d="M91 120 L100 110 L109 120 L106 148 L100 156 L94 148 Z" fill="url(#cbird)"/>
+            <!-- Lightning bolt V shape in body -->
+            <path d="M97 125 L100 123 L103 125 L101 138 L103.5 138 L98 150 L100 140 L97.5 140 Z" fill="#ffffff" opacity=".9"/>
+            <!-- Head/crown of eagle -->
+            <path d="M96 112 C96 106 100 103 104 106 C108 109 107 113 103 114 L100 116 L97 114 Z" fill="rgba(80,160,255,.8)"/>
+          </g>
+
+          <!-- VYRON WORDMARK -->
+          <text x="100" y="175" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="38" letter-spacing="6" fill="white" filter="url(#fsg2)" opacity=".98">VYRON</text>
+          <!-- ENERGY subtext -->
+          <text x="100" y="196" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="20" letter-spacing="10" fill="rgba(255,255,255,.85)">ENERGY</text>
+
+          <!-- ORANGE ACCENT LINE under wordmark -->
+          <rect x="58" y="202" width="84" height="3" rx="1.5" fill="url(#corange)" opacity=".9"/>
+
+          <!-- TAGLINE -->
+          <text x="100" y="220" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="9" letter-spacing="3" fill="rgba(255,200,100,.9)">CHARGE YOUR CORE</text>
+
+          <!-- ORIGINAL FLAVOR badge -->
+          <rect x="66" y="228" width="68" height="18" rx="9" fill="rgba(255,140,0,.15)" stroke="rgba(255,140,0,.6)" stroke-width=".8"/>
+          <text x="100" y="240" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="8" letter-spacing="2.5" fill="rgba(255,160,60,.95)">ORIGINAL FLAVOR</text>
+
+          <!-- KEY STATS LINE -->
+          <text x="100" y="270" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="600" font-size="8" letter-spacing="1.5" fill="rgba(255,255,255,.5)">ZERO SUGAR · 250mg CAFFEINE</text>
+          <text x="100" y="283" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="400" font-size="7.5" letter-spacing="1.5" fill="rgba(255,255,255,.35)">TAURINE · GINSENG · B VITAMINS</text>
+
+          <!-- 4 icon stats row -->
+          <g font-family="'Rajdhani',sans-serif" font-weight="700" font-size="7" fill="rgba(255,255,255,.55)" text-anchor="middle" letter-spacing="1">
+            <text x="61" y="315">FOCUS</text>
+            <text x="83" y="315">POWER</text>
+            <text x="112" y="315">ENDURANCE</text>
+            <text x="139" y="315">RECOVERY</text>
+            <!-- small dots between -->
+            <circle cx="72" cy="312" r="1.5" fill="rgba(255,140,0,.5)"/>
+            <circle cx="97" cy="312" r="1.5" fill="rgba(255,140,0,.5)"/>
+            <circle cx="126" cy="312" r="1.5" fill="rgba(255,140,0,.5)"/>
+          </g>
+
+          <!-- BOTTOM LINE -->
+          <line x1="56" y1="322" x2="144" y2="322" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+          <text x="100" y="338" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="300" font-size="7.5" letter-spacing="2" fill="rgba(255,255,255,.25)">16oz (473ml)</text>
+
+          <!-- BOTTOM AMBIENT GLOW -->
+          <ellipse cx="100" cy="415" rx="55" ry="7" fill="url(#cglow)" opacity=".7"/>
+
+          <!-- TOP RIM METALLIC -->
+          <ellipse cx="100" cy="28" rx="62" ry="10" fill="url(#ctop)"/>
+          <ellipse cx="100" cy="27" rx="52" ry="8" fill="rgba(50,50,80,.9)"/>
+          <ellipse cx="100" cy="26" rx="40" ry="6" fill="rgba(70,70,110,.8)"/>
+          <ellipse cx="100" cy="24" rx="18" ry="4" fill="rgba(100,100,160,.6)"/>
+          <!-- Pull tab -->
+          <rect x="96" y="14" width="8" height="12" rx="2" fill="rgba(150,150,200,.5)"/>
+          <rect x="91" y="12" width="18" height="6" rx="2" fill="rgba(130,130,180,.4)"/>
+          <!-- Rim ring -->
+          <ellipse cx="100" cy="28" rx="62" ry="10" fill="none" stroke="rgba(120,120,180,.3)" stroke-width=".8"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.25);z-index:5">
+    <div style="width:1px;height:50px;background:linear-gradient(to bottom,rgba(0,212,255,.8),transparent);animation:scrollLine 2s ease-in-out infinite"></div>
+    Scroll
+  </div>
+</section>
+<style>@keyframes scrollLine{0%{opacity:.3;}50%{opacity:1;}100%{opacity:.3;}}</style>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span class="marquee-item">POWER BEYOND LIMITS <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">ZERO CRASH FORMULA <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">WATT-MELON <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">MANGO MAYHEM <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">VOLTAGE BERRY <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">NITRO CITRUS <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">250mg CAFFEINE <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">FUEL YOUR GRIND <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">POWER BEYOND LIMITS <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">ZERO CRASH FORMULA <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">WATT-MELON <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">MANGO MAYHEM <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">VOLTAGE BERRY <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">NITRO CITRUS <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">250mg CAFFEINE <span style="color:rgba(0,0,0,.4)">·</span></span>
+    <span class="marquee-item">FUEL YOUR GRIND <span style="color:rgba(0,0,0,.4)">·</span></span>
+  </div>
+</div>
+
+<!-- FLAVORS -->
+<section id="flavors">
+  <div class="flavor-header sr">
+    <div>
+      <div class="eyebrow" style="margin-bottom:.5rem">Four Dimensions of Energy</div>
+      <h2 class="flavor-h2">CHOOSE YOUR<br><em>FREQUENCY</em></h2>
+    </div>
+    <div class="flavor-count">04</div>
+  </div>
+  <div class="flavors-accordion">
+
+    <!-- WATT-MELON: red/black can with orange slashes -->
+    <div class="fl fl-wm">
+      <div class="fl-bg"></div><div class="fl-glow"></div><div class="fl-line"></div>
+      <div class="fl-inner">
+        <div class="fl-num">01</div>
+        <svg class="fl-can-img" viewBox="0 0 120 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="wmbody" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0a0005"/>
+              <stop offset="20%" stop-color="#220010"/>
+              <stop offset="45%" stop-color="#550020"/>
+              <stop offset="55%" stop-color="#880030" stop-opacity=".8"/>
+              <stop offset="65%" stop-color="#aa0030"/>
+              <stop offset="80%" stop-color="#330015"/>
+              <stop offset="100%" stop-color="#0a0005"/>
+            </linearGradient>
+            <linearGradient id="wmhl" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="transparent"/>
+              <stop offset="52%" stop-color="rgba(255,100,100,.1)"/>
+              <stop offset="57%" stop-color="rgba(255,255,255,.3)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+            <linearGradient id="wmorange" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff5500"/>
+              <stop offset="100%" stop-color="#cc3300"/>
+            </linearGradient>
+            <clipPath id="wmclip"><ellipse cx="60" cy="130" rx="38" ry="128"/></clipPath>
+          </defs>
+          <ellipse cx="60" cy="255" rx="35" ry="5" fill="rgba(180,0,0,.3)"/>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#wmbody)"/>
+          <!-- Orange slashes -->
+          <g clip-path="url(#wmclip)">
+            <polygon points="22,50 38,2 52,2 36,50" fill="url(#wmorange)" opacity=".8"/>
+            <polygon points="98,50 82,2 70,2 86,50" fill="url(#wmorange)" opacity=".8"/>
+          </g>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#wmhl)"/>
+          <!-- Bird icon -->
+          <g opacity=".9" filter="url(#fsg2)">
+            <path d="M46 72 C40 68 36 62 40 56 C44 50 52 53 54 59 C50 57 47 61 47 66Z" fill="#ff6666"/>
+            <path d="M74 72 C80 68 84 62 80 56 C76 50 68 53 66 59 C70 57 73 61 73 66Z" fill="#ff6666"/>
+            <path d="M56 52 L60 47 L64 52 L62 72 L60 76 L58 72Z" fill="#ff8888"/>
+            <path d="M58 56 L60 54 L62 56 L61 65 L62.5 65 L59 73 L60 66 L58.5 66Z" fill="white" opacity=".9"/>
+          </g>
+          <text x="60" y="98" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="20" letter-spacing="3" fill="white" opacity=".98">VYRON</text>
+          <text x="60" y="112" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="11" letter-spacing="5" fill="rgba(255,180,180,.8)">ENERGY</text>
+          <rect x="30" y="116" width="60" height="2" rx="1" fill="#ff4400" opacity=".8"/>
+          <text x="60" y="131" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="13" letter-spacing="2" fill="#ff4444">WATT-MELON</text>
+          <text x="60" y="145" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="7" letter-spacing="2" fill="rgba(255,140,140,.7)">WATERMELON FLAVOR</text>
+          <text x="60" y="170" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-size="6" letter-spacing="1.5" fill="rgba(255,255,255,.3)">ZERO SUGAR · 250mg CAFFEINE</text>
+          <ellipse cx="60" cy="2" rx="38" ry="7" fill="#1a001a"/>
+          <ellipse cx="60" cy="2" rx="28" ry="5" fill="#22001a"/>
+        </svg>
+        <div class="fl-tag">Watermelon Flavor</div>
+        <div class="fl-name">WATT-MELON</div>
+        <div class="fl-desc">Neon watermelon surge that hits like a shockwave. Juicy, electric, and completely unhinged.</div>
+        <div class="fl-arrow">Explore World →</div>
+      </div>
+    </div>
+
+    <!-- MANGO MAYHEM: yellow/gold can -->
+    <div class="fl fl-mg">
+      <div class="fl-bg"></div><div class="fl-glow"></div><div class="fl-line"></div>
+      <div class="fl-inner">
+        <div class="fl-num">02</div>
+        <svg class="fl-can-img" viewBox="0 0 120 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mgbody" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0a0600"/>
+              <stop offset="20%" stop-color="#221400"/>
+              <stop offset="45%" stop-color="#664400"/>
+              <stop offset="55%" stop-color="#997700" stop-opacity=".8"/>
+              <stop offset="65%" stop-color="#bb9900"/>
+              <stop offset="80%" stop-color="#442800"/>
+              <stop offset="100%" stop-color="#0a0600"/>
+            </linearGradient>
+            <linearGradient id="mghl" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="transparent"/>
+              <stop offset="52%" stop-color="rgba(255,200,50,.1)"/>
+              <stop offset="57%" stop-color="rgba(255,255,200,.35)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+            <linearGradient id="mgorange" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffaa00"/>
+              <stop offset="100%" stop-color="#cc7700"/>
+            </linearGradient>
+            <clipPath id="mgclip"><ellipse cx="60" cy="130" rx="38" ry="128"/></clipPath>
+          </defs>
+          <ellipse cx="60" cy="255" rx="35" ry="5" fill="rgba(180,120,0,.3)"/>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#mgbody)"/>
+          <g clip-path="url(#mgclip)">
+            <polygon points="22,50 38,2 52,2 36,50" fill="url(#mgorange)" opacity=".85"/>
+            <polygon points="98,50 82,2 70,2 86,50" fill="url(#mgorange)" opacity=".85"/>
+          </g>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#mghl)"/>
+          <g opacity=".9">
+            <path d="M46 72 C40 68 36 62 40 56 C44 50 52 53 54 59 C50 57 47 61 47 66Z" fill="#ffcc44"/>
+            <path d="M74 72 C80 68 84 62 80 56 C76 50 68 53 66 59 C70 57 73 61 73 66Z" fill="#ffcc44"/>
+            <path d="M56 52 L60 47 L64 52 L62 72 L60 76 L58 72Z" fill="#ffdd66"/>
+            <path d="M58 56 L60 54 L62 56 L61 65 L62.5 65 L59 73 L60 66 L58.5 66Z" fill="white" opacity=".9"/>
+          </g>
+          <text x="60" y="98" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="20" letter-spacing="3" fill="white" opacity=".98">VYRON</text>
+          <text x="60" y="112" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="11" letter-spacing="5" fill="rgba(255,220,150,.8)">ENERGY</text>
+          <rect x="30" y="116" width="60" height="2" rx="1" fill="#ffaa00" opacity=".8"/>
+          <text x="60" y="131" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="11" letter-spacing="1.5" fill="#ffcc44">MANGO MAYHEM</text>
+          <text x="60" y="145" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="7" letter-spacing="2" fill="rgba(255,200,100,.7)">MANGO FLAVOR</text>
+          <text x="60" y="170" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-size="6" letter-spacing="1.5" fill="rgba(255,255,255,.3)">ZERO SUGAR · 250mg CAFFEINE</text>
+          <ellipse cx="60" cy="2" rx="38" ry="7" fill="#1a1000"/>
+          <ellipse cx="60" cy="2" rx="28" ry="5" fill="#22180a"/>
+        </svg>
+        <div class="fl-tag">Mango Flavor</div>
+        <div class="fl-name">MANGO MAYHEM</div>
+        <div class="fl-desc">Explosive tropical gold rush. Warm mango ignition that doesn't ask permission.</div>
+        <div class="fl-arrow">Explore World →</div>
+      </div>
+    </div>
+
+    <!-- VOLTAGE BERRY: blue can -->
+    <div class="fl fl-vb">
+      <div class="fl-bg"></div><div class="fl-glow"></div><div class="fl-line"></div>
+      <div class="fl-inner">
+        <div class="fl-num">03</div>
+        <svg class="fl-can-img" viewBox="0 0 120 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vbbody" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#000510"/>
+              <stop offset="20%" stop-color="#001030"/>
+              <stop offset="42%" stop-color="#0028aa"/>
+              <stop offset="52%" stop-color="#0055ee" stop-opacity=".8"/>
+              <stop offset="62%" stop-color="#0044cc"/>
+              <stop offset="80%" stop-color="#001535"/>
+              <stop offset="100%" stop-color="#000510"/>
+            </linearGradient>
+            <linearGradient id="vbhl" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="transparent"/>
+              <stop offset="52%" stop-color="rgba(100,160,255,.15)"/>
+              <stop offset="57%" stop-color="rgba(200,230,255,.4)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+            <linearGradient id="vborange" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2288ff"/>
+              <stop offset="100%" stop-color="#0044cc"/>
+            </linearGradient>
+            <clipPath id="vbclip"><ellipse cx="60" cy="130" rx="38" ry="128"/></clipPath>
+          </defs>
+          <ellipse cx="60" cy="255" rx="35" ry="5" fill="rgba(0,80,200,.3)"/>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#vbbody)"/>
+          <g clip-path="url(#vbclip)">
+            <polygon points="22,50 38,2 52,2 36,50" fill="url(#vborange)" opacity=".7"/>
+            <polygon points="98,50 82,2 70,2 86,50" fill="url(#vborange)" opacity=".7"/>
+          </g>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#vbhl)"/>
+          <g opacity=".9">
+            <path d="M46 72 C40 68 36 62 40 56 C44 50 52 53 54 59 C50 57 47 61 47 66Z" fill="#55aaff"/>
+            <path d="M74 72 C80 68 84 62 80 56 C76 50 68 53 66 59 C70 57 73 61 73 66Z" fill="#55aaff"/>
+            <path d="M56 52 L60 47 L64 52 L62 72 L60 76 L58 72Z" fill="#88ccff"/>
+            <path d="M58 56 L60 54 L62 56 L61 65 L62.5 65 L59 73 L60 66 L58.5 66Z" fill="white" opacity=".9"/>
+          </g>
+          <text x="60" y="98" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="20" letter-spacing="3" fill="white" opacity=".98">VYRON</text>
+          <text x="60" y="112" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="11" letter-spacing="5" fill="rgba(150,200,255,.8)">ENERGY</text>
+          <rect x="30" y="116" width="60" height="2" rx="1" fill="#2288ff" opacity=".8"/>
+          <text x="60" y="131" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="11" letter-spacing="1" fill="#66bbff">VOLTAGE BERRY</text>
+          <text x="60" y="145" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="7" letter-spacing="2" fill="rgba(100,180,255,.7)">CITRUS BLITZ FLAVOR</text>
+          <text x="60" y="170" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-size="6" letter-spacing="1.5" fill="rgba(255,255,255,.3)">ZERO SUGAR · 250mg CAFFEINE</text>
+          <ellipse cx="60" cy="2" rx="38" ry="7" fill="#000a20"/>
+          <ellipse cx="60" cy="2" rx="28" ry="5" fill="#001030"/>
+        </svg>
+        <div class="fl-tag">Citrus Blitz Flavor</div>
+        <div class="fl-name">VOLTAGE BERRY</div>
+        <div class="fl-desc">Night performance mode activated. Electric blue fusion that rewires the mind and holds the line.</div>
+        <div class="fl-arrow">Explore World →</div>
+      </div>
+    </div>
+
+    <!-- NITRO CITRUS: green/olive can -->
+    <div class="fl fl-nc">
+      <div class="fl-bg"></div><div class="fl-glow"></div><div class="fl-line"></div>
+      <div class="fl-inner">
+        <div class="fl-num">04</div>
+        <svg class="fl-can-img" viewBox="0 0 120 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ncbody" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#020800"/>
+              <stop offset="20%" stop-color="#081800"/>
+              <stop offset="42%" stop-color="#1a5500"/>
+              <stop offset="52%" stop-color="#2a8800" stop-opacity=".8"/>
+              <stop offset="62%" stop-color="#226600"/>
+              <stop offset="80%" stop-color="#0a2000"/>
+              <stop offset="100%" stop-color="#020800"/>
+            </linearGradient>
+            <linearGradient id="nchl" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="transparent"/>
+              <stop offset="52%" stop-color="rgba(100,200,80,.1)"/>
+              <stop offset="57%" stop-color="rgba(200,255,180,.35)"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+            <linearGradient id="ncorange" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#44cc22"/>
+              <stop offset="100%" stop-color="#228800"/>
+            </linearGradient>
+            <clipPath id="ncclip"><ellipse cx="60" cy="130" rx="38" ry="128"/></clipPath>
+          </defs>
+          <ellipse cx="60" cy="255" rx="35" ry="5" fill="rgba(40,120,0,.3)"/>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#ncbody)"/>
+          <g clip-path="url(#ncclip)">
+            <polygon points="22,50 38,2 52,2 36,50" fill="url(#ncorange)" opacity=".8"/>
+            <polygon points="98,50 82,2 70,2 86,50" fill="url(#ncorange)" opacity=".8"/>
+          </g>
+          <ellipse cx="60" cy="130" rx="38" ry="128" fill="url(#nchl)"/>
+          <g opacity=".9">
+            <path d="M46 72 C40 68 36 62 40 56 C44 50 52 53 54 59 C50 57 47 61 47 66Z" fill="#66dd44"/>
+            <path d="M74 72 C80 68 84 62 80 56 C76 50 68 53 66 59 C70 57 73 61 73 66Z" fill="#66dd44"/>
+            <path d="M56 52 L60 47 L64 52 L62 72 L60 76 L58 72Z" fill="#88ee66"/>
+            <path d="M58 56 L60 54 L62 56 L61 65 L62.5 65 L59 73 L60 66 L58.5 66Z" fill="white" opacity=".9"/>
+          </g>
+          <text x="60" y="98" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="20" letter-spacing="3" fill="white" opacity=".98">VYRON</text>
+          <text x="60" y="112" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="11" letter-spacing="5" fill="rgba(160,230,130,.8)">ENERGY</text>
+          <rect x="30" y="116" width="60" height="2" rx="1" fill="#44cc22" opacity=".8"/>
+          <text x="60" y="131" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="11" letter-spacing="1" fill="#88ee55">NITRO CITRUS</text>
+          <text x="60" y="145" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-weight="700" font-size="7" letter-spacing="2" fill="rgba(130,200,100,.7)">ZONED-IN REFRESH</text>
+          <text x="60" y="170" text-anchor="middle" font-family="'Rajdhani',sans-serif" font-size="6" letter-spacing="1.5" fill="rgba(255,255,255,.3)">ZERO SUGAR · 250mg CAFFEINE</text>
+          <ellipse cx="60" cy="2" rx="38" ry="7" fill="#050f00"/>
+          <ellipse cx="60" cy="2" rx="28" ry="5" fill="#081800"/>
+        </svg>
+        <div class="fl-tag">Zoned-In Refresh</div>
+        <div class="fl-name">NITRO CITRUS</div>
+        <div class="fl-desc">Neon green plasma adrenaline. High-speed citrus overload that hits the redline on the first sip.</div>
+        <div class="fl-arrow">Explore World →</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- INGREDIENTS -->
+<section id="ingredients">
+  <div class="ing-grid-layout">
+    <div class="ing-sticky">
+      <div class="eyebrow sr">Bioactive Formula Stack</div>
+      <h2 class="ing-h2 sr d1">THE<br><span>FORMULA</span><br>THAT<br>WINS</h2>
+      <p class="ing-body sr d2">Every milligram is deliberate. VYRON's seven bioactive compounds work in sequence — caffeine initiates, L-Theanine smooths, Guarana extends, and electrolytes sustain. No jitter. No crash. Pure performance architecture.</p>
+      <div class="formula-badge sr d3"><div class="badge-dot"></div>Zero Crash · Zero Jitter · All Output</div>
+    </div>
+    <div class="ing-stack">
+      <div class="ing-item sr"><div class="ing-item-bar"></div><div class="ing-icon-box">⚡</div><div><div class="ing-name">Caffeine</div><div class="ing-dose">250mg — Natural Source</div><div class="ing-desc">Precision-dosed natural caffeine for immediate activation. Works synergistically with L-Theanine for clean, sustained alertness without the burnout.</div></div></div>
+      <div class="ing-item sr d1"><div class="ing-item-bar" style="background:var(--purple)"></div><div class="ing-icon-box">🧠</div><div><div class="ing-name">L-Theanine</div><div class="ing-dose">100mg — Pure Form</div><div class="ing-desc">The calm within the storm. Pairs with caffeine to eliminate jitters and sharpen focus to a razor edge.</div></div></div>
+      <div class="ing-item sr d2"><div class="ing-item-bar" style="background:var(--green)"></div><div class="ing-icon-box">🧬</div><div><div class="ing-name">Taurine</div><div class="ing-dose">1000mg</div><div class="ing-desc">Cellular hydration and neuromuscular optimization. The compound elite athletes have quietly used for decades.</div></div></div>
+      <div class="ing-item sr d1"><div class="ing-item-bar" style="background:var(--gold)"></div><div class="ing-icon-box">🌿</div><div><div class="ing-name">Guarana Extract</div><div class="ing-dose">200mg — 22% Caffeine</div><div class="ing-desc">Slow-release natural matrix extending your performance window by hours. The long game your body needs.</div></div></div>
+      <div class="ing-item sr d2"><div class="ing-item-bar" style="background:var(--pink)"></div><div class="ing-icon-box">🔬</div><div><div class="ing-name">Ginseng (Panax)</div><div class="ing-dose">100mg</div><div class="ing-desc">Adaptogenic edge. Reduces mental fatigue and primes the body to operate optimally under sustained pressure.</div></div></div>
+      <div class="ing-item sr d1"><div class="ing-item-bar"></div><div class="ing-icon-box">⚗️</div><div><div class="ing-name">B-Vitamin Complex</div><div class="ing-dose">B6 · B12 · Niacin</div><div class="ing-desc">The metabolic backbone. Converts food to ATP at the cellular level. The real fuel beneath every performance metric.</div></div></div>
+      <div class="ing-item sr d2"><div class="ing-item-bar" style="background:var(--blue)"></div><div class="ing-icon-box">💧</div><div><div class="ing-name">Electrolytes</div><div class="ing-dose">Na · K · Mg · Ca</div><div class="ing-desc">Full-spectrum hydration matrix. Keeps neurons firing and muscles contracting at peak efficiency.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY VYRON -->
+<section id="why">
+  <div class="why-header sr">
+    <div class="eyebrow" style="justify-content:center">The Competitive Edge</div>
+    <h2 class="why-h2">WHY <em>VYRON</em> WINS</h2>
+    <p class="why-sub">Six reasons the elite choose VYRON over everything else.</p>
+  </div>
+  <div class="bento">
+    <div class="bento-cell bc-1"><span class="bc-icon">⚡</span><div class="bc-big" style="font-size:5rem" id="countUp1">0<span style="font-size:2rem">%</span></div><div class="bc-big-label">Crash Rate</div><div class="bc-desc" style="margin-top:1rem">Zero-crash formula engineered through the precise caffeine-to-L-Theanine ratio. Smooth descent, every time.</div></div>
+    <div class="bento-cell bc-2"><span class="bc-icon">🎯</span><div class="bc-title">Enhanced Focus</div><div class="bc-desc">Dual-action nootropic stack. Caffeine + L-Theanine synergy creates alpha-wave brain states associated with flow.</div><div class="bc-bar-wrap"><div class="bc-bar-track"><div class="bc-bar-fill" style="--bw:88%;background:linear-gradient(90deg,var(--blue),var(--purple))"></div></div></div></div>
+    <div class="bento-cell bc-3"><span class="bc-icon">⏱️</span><div class="bc-big">6<span style="font-size:1.5rem">hr</span></div><div class="bc-big-label">Sustained Energy</div></div>
+    <div class="bento-cell bc-4"><span class="bc-icon">🎮</span><div class="bc-title">Gamer Optimized</div><div class="bc-desc">Reaction-speed enhancement tested across 200+ esports sessions. Sub-200ms response times over 4-hour sessions.</div><div class="bc-bar-wrap"><div class="bc-bar-track"><div class="bc-bar-fill" style="--bw:93%;background:linear-gradient(90deg,var(--purple),var(--pink))"></div></div></div></div>
+    <div class="bento-cell bc-5"><span class="bc-icon">💧</span><div class="bc-big">4<span style="font-size:1.5rem">×</span></div><div class="bc-big-label">Hydration vs Water</div></div>
+    <div class="bento-cell bc-6"><span class="bc-icon">🔬</span><div class="bc-title">Premium Ingredients</div><div class="bc-desc">No proprietary blends. Full label transparency. Every compound at clinically studied dosages.</div></div>
+    <div class="bento-cell bc-7"><span class="bc-icon">🏋️</span><div class="bc-title">Athlete Tested</div><div class="bc-desc">Formulated with input from professional athletes across 6 sports disciplines.</div></div>
+    <div class="bento-cell bc-8"><span class="bc-icon">✨</span><div class="bc-title">Creator Mode</div><div class="bc-desc">Extended deep-work sessions. Midnight deadlines met. Ideas flowing at 3am.</div></div>
+  </div>
+</section>
+
+<!-- PERFORMANCE -->
+<section id="performance">
+  <div class="perf-header sr">
+    <div class="eyebrow">Clinical Performance Data</div>
+    <h2 class="perf-h2">DATA<br>DOESN'T <em>LIE</em></h2>
+  </div>
+  <div class="perf-layout">
+    <div class="perf-main-panel sr">
+      <div class="perf-graph-title">Energy Curve — 6 Hour Window<div class="perf-legend"><div class="pl-item"><div class="pl-dot pl-blue"></div>VYRON</div><div class="pl-item"><div class="pl-dot pl-dim"></div>Standard</div></div></div>
+      <svg class="graph-area" viewBox="0 0 560 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#bf00ff"/></linearGradient>
+          <linearGradient id="ga" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#00d4ff" stop-opacity=".35"/><stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/></linearGradient>
+        </defs>
+        <line x1="0" y1="55" x2="560" y2="55" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <line x1="0" y1="110" x2="560" y2="110" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <line x1="0" y1="165" x2="560" y2="165" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <path d="M0 200 C70 170 120 90 170 78 C220 66 270 72 320 85 C370 98 420 120 480 145 C510 158 535 170 560 178" stroke="rgba(255,255,255,.18)" stroke-width="1.5" fill="none" stroke-dasharray="5 5"/>
+        <path d="M0 210 C50 200 90 75 160 38 C230 4 270 16 320 22 C370 28 420 48 470 68 C505 82 530 94 560 98 L560 210 L0 210 Z" fill="url(#ga)"/>
+        <path d="M0 210 C50 200 90 75 160 38 C230 4 270 16 320 22 C370 28 420 48 470 68 C505 82 530 94 560 98" stroke="url(#gg)" stroke-width="2.5" fill="none" stroke-dasharray="900" stroke-dashoffset="900" style="animation:drawGraph 2.5s ease forwards .5s"/>
+        <circle cx="320" cy="22" r="5" fill="#00d4ff" style="animation:popDot .4s ease forwards 3s;transform:scale(0);transform-origin:320px 22px"/>
+        <circle cx="320" cy="22" r="12" fill="rgba(0,212,255,.15)" style="animation:popDot .4s ease forwards 3.1s;transform:scale(0);transform-origin:320px 22px"/>
+      </svg>
+      <style>@keyframes drawGraph{to{stroke-dashoffset:0;}}@keyframes popDot{to{transform:scale(1);}}</style>
+      <div style="display:flex;justify-content:space-between;margin-bottom:2rem">
+        <span style="font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase">0hr</span><span style="font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase">1hr</span><span style="font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase">2hr</span><span style="font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase">3hr</span><span style="font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase">4hr</span><span style="font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase">5hr</span><span style="font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.2);text-transform:uppercase">6hr</span>
+      </div>
+      <div class="perf-summary">
+        <div class="ps-item"><div class="ps-val">+87%</div><div class="ps-label">Focus Enhancement</div></div>
+        <div class="ps-item"><div class="ps-val">2.4×</div><div class="ps-label">Longer Than Standard</div></div>
+        <div class="ps-item"><div class="ps-val">0</div><div class="ps-label">Crash Events</div></div>
+      </div>
+    </div>
+    <div class="perf-metrics">
+      <div class="pm-cell sr">
+        <div class="pm-label">Focus Enhancement</div><div class="pm-val">87<span style="font-size:1.5rem">%</span></div><div class="pm-unit">vs rested baseline at 60 min</div>
+        <svg viewBox="0 0 90 90" width="70" height="70" style="margin-top:1rem"><defs><linearGradient id="rg1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#bf00ff"/></linearGradient></defs><circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="4"/><circle cx="45" cy="45" r="38" fill="none" stroke="url(#rg1)" stroke-width="4" stroke-linecap="round" transform="rotate(-90 45 45)" stroke-dasharray="239" stroke-dashoffset="239" style="animation:fillRad 2s ease forwards 1s"/><style>@keyframes fillRad{to{stroke-dashoffset:31}}</style></svg>
+      </div>
+      <div class="pm-cell sr d1">
+        <div class="pm-label">Reaction Speed</div><div class="pm-val">2.4<span style="font-size:1.5rem">×</span></div><div class="pm-unit">faster signal processing</div>
+        <svg viewBox="0 0 90 90" width="70" height="70" style="margin-top:1rem"><defs><linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#bf00ff"/><stop offset="100%" stop-color="#ff003c"/></linearGradient></defs><circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="4"/><circle cx="45" cy="45" r="38" fill="none" stroke="url(#rg2)" stroke-width="4" stroke-linecap="round" transform="rotate(-90 45 45)" stroke-dasharray="239" stroke-dashoffset="239" style="animation:fillRad2 2s ease forwards 1.2s"/><style>@keyframes fillRad2{to{stroke-dashoffset:60}}</style></svg>
+      </div>
+      <div class="pm-cell sr d2">
+        <div class="pm-label">Sustained Energy</div><div class="pm-val">6<span style="font-size:1.5rem">hr</span></div><div class="pm-unit">no crash · no plateau</div>
+        <svg viewBox="0 0 90 90" width="70" height="70" style="margin-top:1rem"><defs><linearGradient id="rg3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00ff88"/><stop offset="100%" stop-color="#00d4ff"/></linearGradient></defs><circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="4"/><circle cx="45" cy="45" r="38" fill="none" stroke="url(#rg3)" stroke-width="4" stroke-linecap="round" transform="rotate(-90 45 45)" stroke-dasharray="239" stroke-dashoffset="239" style="animation:fillRad3 2s ease forwards 1.4s"/><style>@keyframes fillRad3{to{stroke-dashoffset:18}}</style></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-year">2024</div>
+  <div class="about-grid">
+    <div class="about-left">
+      <div class="eyebrow sr">Our Origin</div>
+      <h2 class="about-h2 sr d1">BUILT FROM<br><em>MIDNIGHT<br>HUSTLE</em></h2>
+      <p class="about-body sr d2">VYRON didn't start in a boardroom. It started at 2am in a dorm room, staring at a screen, running on garbage-tier energy drinks that left us shaking and crashing by 4am. We were gamers, builders, athletes — and every product on the shelf was designed for casual consumption, not peak performance.</p>
+      <p class="about-body sr d3">In 2024, we decided to engineer what didn't exist: a drink built around the science of sustained output. Seven bioactive compounds. No shortcuts. No proprietary blend hiding bad ratios. Just transparent, clinical-grade fuel for people who take their craft seriously.</p>
+      <p class="about-body sr d4" style="margin-top:1.5rem">VYRON's mission is simple — <strong style="color:rgba(255,255,255,.8);font-weight:700">eliminate the ceiling</strong> that bad energy puts on human performance.</p>
+    </div>
+    <div class="about-right" id="aboutStats">
+      <div class="about-stat-row"><div class="asr-num">2024</div><div><div class="asr-label">Year Founded</div><div class="asr-sub">Born from a late-night frustration</div></div></div>
+      <div class="about-stat-row"><div class="asr-num">7</div><div><div class="asr-label">Bioactive Compounds</div><div class="asr-sub">Every ingredient earns its place</div></div></div>
+      <div class="about-stat-row"><div class="asr-num">4</div><div><div class="asr-label">Flavor Universes</div><div class="asr-sub">Each one engineered for immersion</div></div></div>
+      <div class="about-stat-row"><div class="asr-num">0%</div><div><div class="asr-label">Compromise</div><div class="asr-sub">No proprietary blends. Ever.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="eyebrow sr" style="justify-content:center">Are You Ready?</div>
+  <h2 class="cta-h2 sr d1">UNLOCK<br><span class="line-glow">YOUR NEXT<br>LEVEL</span></h2>
+  <p class="cta-sub sr d2">Stop running on empty. VYRON was built for those who demand more from every hour, every session, every day.</p>
+  <div class="cta-btns sr d3">
+    <button class="btn-glow"><span>Fuel Your Grind →</span></button>
+    <button class="btn-ghost">Join The Movement</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <span class="footer-logo">VYRON</span>
+      <p class="footer-tagline">Power beyond limits. Engineered for creators, gamers, and athletes who refuse to run on empty.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn" title="Instagram">📸</a>
+        <a href="#" class="social-btn" title="TikTok">🎵</a>
+        <a href="#" class="social-btn" title="X">✖</a>
+        <a href="#" class="social-btn" title="YouTube">▶</a>
+        <a href="#" class="social-btn" title="Discord">💬</a>
+      </div>
+    </div>
+    <div class="footer-col"><h4>Products</h4><ul><li><a href="#flavors">Watt-Melon</a></li><li><a href="#flavors">Mango Mayhem</a></li><li><a href="#flavors">Voltage Berry</a></li><li><a href="#flavors">Nitro Citrus</a></li><li><a href="#">Bundle Packs</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="#about">Our Story</a></li><li><a href="#ingredients">The Formula</a></li><li><a href="#">Careers</a></li><li><a href="#">Press</a></li><li><a href="#">Affiliates</a></li></ul></div>
+    <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Stockists</a></li><li><a href="#">Contact Us</a></li><li><a href="#">Shipping Info</a></li><li><a href="#">Returns</a></li><li><a href="#">FAQ</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2024 VYRON Energy. All rights reserved.</div>
+    <div class="footer-badge">Zero crash. All output.</div>
+    <div class="footer-legal"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a></div>
+  </div>
+</footer>
+
+<script>
+/* ── CURSOR ── */
+const cur=document.getElementById('cur'),curRing=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;curRing.style.left=rx+'px';curRing.style.top=ry+'px';requestAnimationFrame(animRing);})();
+document.querySelectorAll('a,button,.fl,.ing-item,.bento-cell,.pm-cell,.social-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='22px';cur.style.height='22px';curRing.style.width='64px';curRing.style.height='64px';curRing.style.borderColor='rgba(0,212,255,.7)';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='12px';cur.style.height='12px';curRing.style.width='40px';curRing.style.height='40px';curRing.style.borderColor='rgba(0,212,255,.4)';});
+});
+
+/* ── INTRO ANIMATION ── */
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('intro').classList.add('gone');
+    document.body.style.overflow='';
+  }, 2600);
+});
+document.body.style.overflow='hidden';
+
+/* ── SCROLL-LINKED CAN SPIN ── */
+const canWrap = document.getElementById('hero-can-wrap');
+let currentRotY = -15; // starting angle
+let targetRotY = -15;
+let lastScroll = 0;
+let canFloatY = 0;
+let floatTime = 0;
+
+function updateCan() {
+  // Smooth rotation lerp
+  currentRotY += (targetRotY - currentRotY) * 0.08;
+  // Gentle float
+  floatTime += 0.012;
+  canFloatY = Math.sin(floatTime) * 14;
+  // Apply both transforms
+  canWrap.style.transform = `translate(-50%, calc(-50% + ${canFloatY}px)) rotateY(${currentRotY}deg)`;
+  requestAnimationFrame(updateCan);
+}
+updateCan();
+
+// Map scroll position to rotation
+window.addEventListener('scroll', () => {
+  const scrolled = window.pageYOffset;
+  const maxScroll = document.body.scrollHeight - window.innerHeight;
+  const progress = scrolled / Math.max(maxScroll, 1);
+  // Full 720° rotation across full page scroll, starting from -15
+  targetRotY = -15 + progress * 720;
+}, {passive: true});
+
+/* ── HERO MOUSE PARALLAX (subtle tilt only, rotation is scroll-driven) ── */
+document.addEventListener('mousemove', e => {
+  const dx = (e.clientX / window.innerWidth - 0.5) * 8;
+  const dy = (e.clientY / window.innerHeight - 0.5) * 6;
+  // Only adjust float offset, not rotation
+  canWrap.style.setProperty('--mx-shift', dx + 'px');
+});
+
+/* ── CANVAS PARTICLES ── */
+const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const COLORS=['#00d4ff','#bf00ff','#0066ff','#00ff88'];
+const particles=Array.from({length:80},()=>({x:Math.random()*1920,y:Math.random()*1080,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*1.5+.3,color:COLORS[Math.floor(Math.random()*COLORS.length)],alpha:Math.random()*.5+.1}));
+function drawLines(){for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<120){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,212,255,${(1-dist/120)*.06})`;ctx.lineWidth=.5;ctx.stroke();}}}}
+function animCanvas(){ctx.clearRect(0,0,W,H);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.alpha;ctx.fill();ctx.globalAlpha=1;});drawLines();requestAnimationFrame(animCanvas);}
+animCanvas();
+
+/* ── SCROLL REVEALS ── */
+const srObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:.12});
+document.querySelectorAll('.sr').forEach(el=>srObs.observe(el));
+document.querySelectorAll('#hero .sr').forEach(el=>el.classList.add('vis'));
+
+/* ── BENTO SCROLL ANIM ── */
+const bentoSection=document.getElementById('why');
+const bentoObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      document.querySelectorAll('.bento-cell').forEach((cell,i)=>{setTimeout(()=>cell.classList.add('bvis'),i*80);});
+      bentoObs.disconnect();
+    }
+  });
+},{threshold:.1});
+if(bentoSection)bentoObs.observe(bentoSection);
+
+/* ── BENTO MOUSE GLOW ── */
+document.querySelectorAll('.bento-cell').forEach(cell=>{
+  cell.addEventListener('mousemove',e=>{const rect=cell.getBoundingClientRect();cell.style.setProperty('--mx',((e.clientX-rect.left)/rect.width*100)+'%');cell.style.setProperty('--my',((e.clientY-rect.top)/rect.height*100)+'%');});
+});
+
+/* ── BENTO BARS ── */
+const barObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.querySelectorAll('.bc-bar-fill').forEach(b=>{b.style.animation='barGrow 1.5s ease forwards';});});},{threshold:.3});
+document.querySelectorAll('.bento-cell').forEach(c=>barObs.observe(c));
+const styleEl=document.createElement('style');styleEl.textContent='@keyframes barGrow{to{width:var(--bw,80%)}}';document.head.appendChild(styleEl);
+
+/* ── ABOUT STATS ANIM ── */
+const aboutObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('.about-stat-row').forEach((row,i)=>{setTimeout(()=>row.classList.add('avis'),i*120);});aboutObs.disconnect();}});},{threshold:.2});
+const aboutStats=document.getElementById('aboutStats');
+if(aboutStats)aboutObs.observe(aboutStats);
+
+/* ── STAT COUNT UP ── */
+function countUp(el,target,suffix=''){let c=0;const step=target/60;const t=setInterval(()=>{c+=step;if(c>=target){c=target;clearInterval(t);}el.textContent=Math.floor(c)+suffix;},20);}
+const statsObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){countUp(document.getElementById('stat1'),7);countUp(document.getElementById('stat2'),6);countUp(document.getElementById('stat3'),4);statsObs.disconnect();}});},{threshold:.5});
+const s1=document.getElementById('stat1');if(s1)statsObs.observe(s1);
+
+/* ── BENTO COUNT UP ── */
+const bentoCountObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const el=document.getElementById('countUp1');if(el){let c=100;const t=setInterval(()=>{c--;if(c<=0){c=0;clearInterval(t);}el.innerHTML=c+'<span style="font-size:2rem">%</span>';},18);}bentoCountObs.disconnect();}});},{threshold:.3});
+if(bentoSection)bentoCountObs.observe(bentoSection);
+</script>
+</body>
+</html>
